@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
+            margin: 0;
+            padding: 0;
+            color: #343a40;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            background-color: #343a40;
+            padding: 15px;
+            color: #fff;
+        }
+        .header img {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .nav-buttons {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .nav-buttons button {
+            margin: 5px;
+            background-color: #6c757d;
+            border: none;
+            color: #fff;
+        }
+        .nav-buttons button:hover {
+            background-color: #495057;
+        }
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            width: 300px;
+            margin-right: 5px;
+        }
+        .container-fluid {
+            padding: 20px;
+        }
+        .calendar {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .event-list {
+            max-height: 500px;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .event-list h3 {
+            margin-top: 0;
+            color: #6c757d;
+        }
+        .list-group-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-close {
+            background: transparent;
+            border: none;
+        }
+        .form-label {
+            margin-bottom: 0.5rem;
+        }
+        .btn-custom {
+            margin-top: 0.5rem;
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #495057;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img src="https://via.placeholder.com/50" alt="Checklist Logo">
+    <h1>Checklist Dashboard</h1>
+</div>
+
+<div class="container-fluid">
+    <div class="nav-buttons">
+        <button class="btn btn-primary" id="calendarBtn">Calendar</button>
+        <button class="btn btn-secondary" id="analyticsBtn">Analytics</button>
+        <button class="btn btn-success" id="dashboardBtn">Dashboard</button>
+        <button class="btn btn-warning" id="addChecklistBtn">Add Checklist</button>
+        <button class="btn btn-danger" id="clearAllBtn">Clear All</button>
+    </div>
+
+    <div class="search-bar mb-4">
+        <input type="text" class="form-control" placeholder="Search checklist" id="searchChecklist">
+        <button class="btn btn-outline-secondary" type="button" id="searchBtn">Search</button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="calendar" id="calendar"></div>
+        </div>
+        <div class="col-md-4">
+            <div class="event-list">
+                <h3>Events</h3>
+                <ul class="list-group" id="event-list">
+                    <!-- Events will appear here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalLabel">Add Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="eventName" class="form-label">Event Name</label>
+                            <input type="text" class="form-control" id="eventName" required>
+                        </div>
+                        <div class="col">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" required>
+                                <option selected disabled value="">Choose...</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="eventStartDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="eventStartDate" required>
+                        </div>
+                        <div class="col">
+                            <label for="eventEndDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="eventEndDate" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="repetition" class="form-label">Repetition</label>
+                        <select class="form-select" id="repetition" required>
+                            <option selected disabled value="">Choose...</option>
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="daysOfWeek" class="form-label">Repeat On</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="sunday" value="Sunday">
+                            <label class="form-check-label" for="sunday">Sun</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="monday" value="Monday">
+                            <label class="form-check-label" for="monday">Mon</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="tuesday" value="Tuesday">
+                            <label class="form-check-label" for="tuesday">Tue</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="wednesday" value="Wednesday">
+                            <label class="form-check-label" for="wednesday">Wed</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="thursday" value="Thursday">
+                            <label class="form-check-label" for="thursday">Thu</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="friday" value="Friday">
+                            <label class="form-check-label" for="friday">Fri</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="saturday" value="Saturday">
+                            <label class="form-check-label" for="saturday">Sat</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subChecklist" class="form-label">Sub Checklist</label>
+                        <textarea class="form-control" id="subChecklist" rows="3"></textarea>
+                        <button type="button" class="btn btn-custom">Add Sub Checklist</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="marketing" class="form-label">Marketing</label>
+                        <select class="form-select" id="marketing">
+                            <option selected disabled value="">Choose...</option>
+                            <option value="Email">Email</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="SEO">SEO</option>
+                            <option value="PPC">PPC</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Note</label>
+                        <textarea class="form-control" id="note" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comments" class="form-label">Comments</label>
+                        <textarea class="form-control" id="comments" rows="2"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            dateClick: function(info) {
+                $('#eventModal').modal('show');
+                $('#eventStartDate').val(info.dateStr);
+                $('#eventEndDate').val(info.dateStr);
+            }
+        });
+        calendar.render();
+
+        $('#eventForm').on('submit', function(e) {
+            e.preventDefault();
+            var eventName = $('#eventName').val();
+            var eventStartDate = $('#eventStartDate').val();
+            var eventEndDate = $('#eventEndDate').val();
+            var subChecklist = $('#subChecklist').val();
+
+            var eventHtml = '<li class="list-group-item"><strong>' + eventName + '</strong><br>' +
+                'Start: ' + eventStartDate + '<br>' +
+                'End: ' + eventEndDate + '<br>' +
+                'Checklist: ' + subChecklist + '</li>';
+            
+            $('#event-list').append(eventHtml);
+            $('#eventModal').modal('hide');
+        });
+
+        $('#clearAllBtn').on('click', function() {
+            $('#event-list').empty();
+        });
+
+        $('#searchBtn').on('click', function() {
+            var searchText = $('#searchChecklist').val().toLowerCase();
+            $('#event-list li').each(function() {
+                var eventText = $(this).text().toLowerCase();
+                if (eventText.includes(searchText)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
